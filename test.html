@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lottie Animation Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #121214;
+      color: #e4e4e7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+    p.subtitle {
+      font-size: 0.95rem;
+      color: #a1a1aa;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      background-color: #18181b;
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid #27272a;
+      width: 100%;
+    }
+    button, input[type="file"], select {
+      background-color: #27272a;
+      color: #f4f4f5;
+      border: 1px solid #3f3f46;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      background-color: #3f3f46;
+      border-color: #52525b;
+    }
+    .preview-box {
+      width: 100%;
+      height: 480px;
+      border-radius: 16px;
+      border: 2px dashed #3f3f46;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      background-image: 
+        linear-gradient(45deg, #1f1f23 25%, transparent 25%), 
+        linear-gradient(-45deg, #1f1f23 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #1f1f23 75%), 
+        linear-gradient(-45deg, transparent 75%, #1f1f23 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      background-color: #141417;
+    }
+    .preview-box.bg-dark {
+      background-image: none;
+      background-color: #09090b;
+    }
+    .preview-box.bg-light {
+      background-image: none;
+      background-color: #ffffff;
+    }
+    #lottie-player {
+      width: 100%;
+      height: 100%;
+    }
+    .info-bar {
+      font-size: 0.85rem;
+      color: #71717a;
+      display: flex;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎬 Lottie JSON Animation Viewer</h1>
+    <p class="subtitle">Solid Background Removal to Lottie Converter Verification</p>
+  </header>
+
+  <div class="container">
+    <div class="controls">
+      <input type="file" id="file-input" accept=".json">
+      <button id="btn-play">Pause</button>
+      <button id="btn-restart">Restart</button>
+      <select id="bg-selector">
+        <option value="checkered">Checkered (Transparent)</option>
+        <option value="dark">Dark Background</option>
+        <option value="light">Light Background</option>
+      </select>
+    </div>
+
+    <div class="preview-box" id="preview-box">
+      <div id="lottie-player"></div>
+    </div>
+
+    <div class="info-bar">
+      <span id="info-file">File: output/sample_test.json</span>
+      <span id="info-status">Status: Ready</span>
+    </div>
+  </div>
+
+  <script>
+    let anim = null;
+    let isPlaying = true;
+    const playerContainer = document.getElementById('lottie-player');
+    const fileInput = document.getElementById('file-input');
+    const btnPlay = document.getElementById('btn-play');
+    const btnRestart = document.getElementById('btn-restart');
+    const bgSelector = document.getElementById('bg-selector');
+    const previewBox = document.getElementById('preview-box');
+    const infoFile = document.getElementById('info-file');
+    const infoStatus = document.getElementById('info-status');
+
+    function loadLottieData(data, name = "Custom JSON") {
+      if (anim) {
+        anim.destroy();
+      }
+      anim = lottie.loadAnimation({
+        container: playerContainer,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        animationData: data
+      });
+
+      isPlaying = true;
+      btnPlay.textContent = "Pause";
+      infoFile.textContent = `File: ${name}`;
+      infoStatus.textContent = `FPS: ${data.fr || 15} | Frames: ${data.op - data.ip} | Dimensions: ${data.w}x${data.h}`;
+    }
+
+    function loadLottieUrl(url) {
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error("File not found");
+          return res.json();
+        })
+        .then(data => {
+          loadLottieData(data, url);
+        })
+        .catch(err => {
+          infoStatus.textContent = `Error loading default path: ${err.message}`;
+        });
+    }
+
+    // Default load attempt
+    loadLottieUrl('output/sample_test.json');
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const json = JSON.parse(evt.target.result);
+          loadLottieData(json, file.name);
+        } catch (err) {
+          alert('Invalid JSON file format.');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    btnPlay.addEventListener('click', () => {
+      if (!anim) return;
+      if (isPlaying) {
+        anim.pause();
+        btnPlay.textContent = "Play";
+      } else {
+        anim.play();
+        btnPlay.textContent = "Pause";
+      }
+      isPlaying = !isPlaying;
+    });
+
+    btnRestart.addEventListener('click', () => {
+      if (!anim) return;
+      anim.goToAndPlay(0);
+      isPlaying = true;
+      btnPlay.textContent = "Pause";
+    });
+
+    bgSelector.addEventListener('change', (e) => {
+      previewBox.className = 'preview-box';
+      if (e.target.value === 'dark') {
+        previewBox.classList.add('bg-dark');
+      } else if (e.target.value === 'light') {
+        previewBox.classList.add('bg-light');
+      }
+    });
+  </script>
+</body>
+</html>

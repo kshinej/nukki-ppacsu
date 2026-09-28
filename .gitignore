@@ -1,0 +1,54 @@
+# ==========================================
+# Python Bytecode & Cache Files
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ==========================================
+# Virtual Environments
+# ==========================================
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ==========================================
+# PyInstaller & Build Executables (.exe / .app / .dmg)
+# ==========================================
+build/
+dist/
+*.manifest
+*.spec
+
+# ==========================================
+# Generated Media & Output Folders
+# ==========================================
+input/*.mp4
+input/*.mov
+input/*.avi
+input/*.mkv
+output/
+lottie-output/
+debug/
+
+# ==========================================
+# IDE & System Files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+.vscode/
+.idea/
+*.swp
+*.swo
