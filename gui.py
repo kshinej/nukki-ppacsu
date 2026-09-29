@@ -47,13 +47,21 @@ def get_default_output_dir():
     return os.path.join(os.path.expanduser("~"), "Downloads", "lottie-output")
 
 
-def parse_dropped_files(data_str: str) -> list:
+def parse_dropped_files(data_str) -> list:
     """Parses Drag-and-Drop file path string, safely handling braces and spaces."""
     if not data_str:
         return []
+    if isinstance(data_str, (list, tuple)):
+        return [str(p).strip('{}').strip('"\'') for p in data_str]
+    data_str = str(data_str).strip()
     pattern = r'\{([^}]+)\}|(\S+)'
-    matches = re.findall(pattern, data_str.strip())
-    return [m[0] or m[1] for m in matches if (m[0] or m[1])]
+    matches = re.findall(pattern, data_str)
+    res = []
+    for m in matches:
+        p = (m[0] or m[1]).strip().strip('"\'')
+        if p:
+            res.append(p)
+    return res
 
 
 class LottieConverterGUI:
@@ -157,7 +165,7 @@ class LottieConverterGUI:
             text="📂 동영상 파일 끌어다 놓기 (Drag & Drop)",
             font=(FONT_FAMILY, 9, "bold"),
             foreground="#2563eb",
-            cursor="pointinghand"
+            cursor="hand2"
         )
         self.lbl_drop_title.pack(anchor=tk.CENTER)
         self.lbl_drop_title.bind("<Button-1>", lambda e: self.browse_video())
@@ -167,7 +175,7 @@ class LottieConverterGUI:
             text="여기에 .mp4, .mov 파일을 끌어다 놓거나 클릭하여 선택",
             font=(FONT_FAMILY, 8),
             foreground="#666666",
-            cursor="pointinghand"
+            cursor="hand2"
         )
         self.lbl_drop_hint.pack(anchor=tk.CENTER, pady=(2, 0))
         self.lbl_drop_hint.bind("<Button-1>", lambda e: self.browse_video())
