@@ -47,7 +47,9 @@ def main():
     parser.add_argument("--format", type=str, choices=["lottie", "gif", "both"], default="both", help="Export format: 'lottie' (.json), 'gif' (.gif), or 'both' (default: both)")
     parser.add_argument("--mode", type=str, choices=["image", "vector"], default="image", help="Output mode: 'image' (Original video colors/texture with transparent BG) or 'vector' (Flat shape silhouette)")
     parser.add_argument("--fps", type=float, default=config.DEFAULT_TARGET_FPS, help="Target FPS for output (default: 15)")
-    parser.add_argument("--threshold", type=float, default=config.BACKGROUND_THRESHOLD, help="Background color distance threshold (default: 35)")
+    parser.add_argument("--threshold", type=float, default=config.BACKGROUND_THRESHOLD, help="Background color distance threshold (default: 30)")
+    parser.add_argument("--outer-only", dest="outer_only", action="store_true", default=getattr(config, "DEFAULT_OUTER_ONLY", True), help="Only remove background connected to outer borders (default: True)")
+    parser.add_argument("--no-outer-only", dest="outer_only", action="store_false", help="Remove all matching background color globally throughout frame")
     parser.add_argument("--edge-trim", type=int, default=config.DEFAULT_EDGE_TRIM, help="Pixels to shrink mask inward (0~5px) to slice off dark/green border halos")
     parser.add_argument("--edge-blur", type=int, default=config.DEFAULT_EDGE_BLUR, help="Gaussian feathering blur radius (0~7px) for smooth edges")
     parser.add_argument("--epsilon", type=float, default=config.CONTOUR_EPSILON_RATIO, help="Contour simplification ratio (vector mode)")
@@ -99,11 +101,12 @@ def main():
 
     rgb = bg_color["rgb"]
 
-    print(f"[3/6] Removing background (Format: {args.format.upper()}, Mode: {args.mode.upper()})...")
+    print(f"[3/6] Removing background (Format: {args.format.upper()}, Mode: {args.mode.upper()}, Outer-only: {args.outer_only})...")
     remover = BackgroundRemover(
         threshold=args.threshold,
         edge_trim=args.edge_trim,
-        edge_blur=args.edge_blur
+        edge_blur=args.edge_blur,
+        outer_only=args.outer_only
     )
 
     out_w, out_h = FrameProcessor.compute_target_dimensions(

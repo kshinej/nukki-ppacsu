@@ -23,6 +23,7 @@ venv.bak/
 # ==========================================
 build/
 dist/
+.pyinstaller_cache/
 *.manifest
 *.spec
 

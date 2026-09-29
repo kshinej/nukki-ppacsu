@@ -12,9 +12,10 @@ CORNER_SAMPLE_RATIO = 0.04
 VALIDATION_CHECKPOINTS = [0.0, 0.25, 0.50, 0.75, 1.0]
 
 # Background Removal / Mask Settings
-BACKGROUND_THRESHOLD = 35.0  # Color distance threshold in LAB space
+BACKGROUND_THRESHOLD = 30.0  # Color distance threshold in LAB space
 SOFT_THRESHOLD_DELTA = 10.0  # Soft transition range for alpha edge smoothing
 MORPH_KERNEL_SIZE = 3        # Size of morphological filter kernel (e.g., 3x3)
+DEFAULT_OUTER_ONLY = True    # Only remove outer boundary-connected background (protects internal white/same-color details)
 
 # Edge & Halo Cleanup Settings (Fixes dark/light border halos around background)
 DEFAULT_EDGE_TRIM = 1        # Pixels to shrink mask inward (0~5px) to slice off compression halos
